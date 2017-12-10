@@ -44,9 +44,21 @@ public class DuplicateCleaner {
 		{
 			InputStream is = Files.newInputStream(image1);
 			DigestInputStream dis = new DigestInputStream(is, md);
+			int bytesRead = 0;
+			byte[] byteStream = new byte[1024];
+			while (dis.read(byteStream) > 0) {
+				bytesRead += byteStream.length;
+			}
+			System.out.println("bytes read: " + bytesRead);
 			image1sha1 = md.digest();
+			
 			InputStream is2 = Files.newInputStream(image2);
-			DigestInputStream dis2 = new DigestInputStream(is2, md);
+			bytesRead = 0;
+			byte[] byteStream2 = new byte[1024];
+			DigestInputStream dis2 = new DigestInputStream(is2, md2);
+			while (dis2.read(byteStream2) > 0) {
+				bytesRead += byteStream2.length;
+			}
 			image2sha1 = md2.digest();
 			
 		  /* Read decorated stream (dis) to EOF as normal... */
