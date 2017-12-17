@@ -83,8 +83,4 @@ public class DuplicateCleaner {
 //		Hex.encodeHexString(hashInByte) -- lowercase
 		return Hex.encodeHexString(hashInByte);
 	}
-	protected String hashByteToString(byte[] hashInByte, Object o) {
-//		javax.xml.bind.DatatypeConverter.printHexBinary(hashInByte) -- uppercase 
-		return javax.xml.bind.DatatypeConverter.printHexBinary(hashInByte);
-	}
 }
