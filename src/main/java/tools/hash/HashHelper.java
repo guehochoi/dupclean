@@ -8,9 +8,13 @@ import java.nio.file.Paths;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.codec.binary.Hex;
 
+import tools.hash.HashKeeper.HashKey;
 import tools.stream.ResourceManagementHelper;
 
 public class HashHelper {
@@ -20,8 +24,11 @@ public class HashHelper {
 	 * @param algorithms desired hash algirhtm to be used
 	 * @return hash byte array of the file
 	 */
-	public byte[] getHashInBytes(String filepath, String algorithm) {
+	public static byte[] getHashInBytes(String filepath, String algorithm) {
 		Path path = Paths.get(filepath);
+		return getHashInBytes(path, algorithm);
+	}
+	public static byte[] getHashInBytes(Path path, String algorithm) {
 		MessageDigest md = null;
 		InputStream is = null;
 		DigestInputStream dis = null;
@@ -49,8 +56,26 @@ public class HashHelper {
 		return hashInByte;
 	}
 	
-	public String hashByteToString(byte[] hashInByte) {
+	public static String hashByteToString(byte[] hashInByte) {
 //		Hex.encodeHexString(hashInByte) -- lowercase
 		return Hex.encodeHexString(hashInByte);
+	}
+	
+	public static boolean addItemToMap(byte[] hashbyte, String filepath) {
+		try {
+			Map<HashKey, List<String>> hashToFiles = HashKeeper.getHashToFilepathsMap();
+			HashKey key = new HashKey(hashbyte);
+			if (hashToFiles.containsKey(key)) {
+				List<String> filepaths = hashToFiles.get(key);
+				filepaths.add(filepath);
+			} else {
+				List<String> filepaths = new ArrayList<String>();
+				filepaths.add(filepath);
+				hashToFiles.put(key, filepaths);
+			}
+		} catch(Exception e) {
+			return false;
+		}
+		return true;
 	}
 }
