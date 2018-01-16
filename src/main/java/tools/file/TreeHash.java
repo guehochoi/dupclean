@@ -11,6 +11,8 @@ import tools.hash.HashHelper;
 
 public class TreeHash implements FileVisitor<Path> {
 
+	private int count = 0;
+	
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 		return FileVisitResult.CONTINUE;
 	}
@@ -19,6 +21,7 @@ public class TreeHash implements FileVisitor<Path> {
 		byte[] hashbyte = HashHelper.getHashInBytes(file, "SHA-1");
 		String filepath = file.toAbsolutePath().toString();
 		HashHelper.addItemToMap(hashbyte, filepath);
+		count ++;
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -35,5 +38,14 @@ public class TreeHash implements FileVisitor<Path> {
 	public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 		return FileVisitResult.CONTINUE;
 	}
+
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
+	}
+	
 	
 }

@@ -43,7 +43,7 @@ public class HashHelper {
 			while (dis.read(byteStream) > 0) {
 				bytesRead += byteStream.length;
 			}
-			System.out.println("bytes read for file " + path + ": " + bytesRead);
+			/*System.out.println("bytes read for file " + path + ": " + bytesRead);*/
 			hashInByte = md.digest();
 		} catch (IOException e) {
 			e.printStackTrace();

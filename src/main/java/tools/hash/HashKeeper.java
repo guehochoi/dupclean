@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import tools.file.TreeHash;
 
@@ -30,13 +32,24 @@ public class HashKeeper {
 	 * initializes the map with the hash as key and list of filepath as value
 	 */
 	public static void init(String rootpath) {
-		TreeHash treeHash = new TreeHash();
+		final TreeHash treeHash = new TreeHash();
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				System.out.println("hashing processed " + treeHash.getCount() + " files");
+			}
+			
+		}, 7*1000, 5*1000);
 		try {
 			Files.walkFileTree(Paths.get(rootpath), treeHash);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.print("there was an error while walking the file tree");
 		}
+		timer.cancel();
+		timer.purge();
 	}
 	
 	public static class HashKey {
