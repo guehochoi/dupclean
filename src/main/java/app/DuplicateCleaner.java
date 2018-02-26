@@ -3,6 +3,8 @@ package app;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.UnmappableCharacterException;
 import java.nio.file.DirectoryStream;
@@ -13,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.Formatter;
 import java.util.FormatterClosedException;
 import java.util.IllegalFormatException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -71,32 +74,40 @@ public class DuplicateCleaner {
 		Map<HashKeeper.HashKey, List<String>> map = HashKeeper.getHashToFilepathsMap();
 		
 		Path output_filepath = Paths.get("output");
-		Charset charset = Charset.forName("ISO-2022-KR");
-		
+		Charset charset = Charset.forName("UTF-8");
+		boolean addNewLine = false;
 		try (BufferedWriter writer = Files.newBufferedWriter(output_filepath, charset)) {
 			StringBuilder sb = new StringBuilder(); 
-			Formatter formatter = new Formatter(sb, Locale.US); 
+			//Formatter formatter = new Formatter(sb, Locale.US); 
 			
 			for (HashKeeper.HashKey key : map.keySet()) {
 				List<String> filenames = map.get(key);
 				if (filenames.size() > 1) {
 					sb.setLength(0);
-					formatter.format("Hash: %s has %d collisions\n", HashHelper.hashByteToString(key.getHashInBytes()), filenames.size());
-					writer.write(sb.toString());
-					
-					for (String filename : filenames) {
-						sb.setLength(0);
-						formatter.format("Filename: %s\n", filename);
-						writer.write(sb.toString());
+					if (addNewLine) {
+						writer.newLine();
+						addNewLine = false;
 					}
+					//formatter.format("Hash: %s has %d collisions\n", HashHelper.hashByteToString(key.getHashInBytes()), filenames.size());
+					//writer.write(sb.toString());
+					
+					for (Iterator<String> it = filenames.iterator(); it.hasNext();) {
+						sb.append(it.next());
+						if (it.hasNext()) {
+							sb.append("|");
+						}
+					}
+					
+					writer.write(sb.toString());
+					addNewLine = true;
 				}
 			}
-			formatter.close();
+			//formatter.close();
 			writer.close();
 		
 		} catch (UnmappableCharacterException e) { 
 			e.printStackTrace();
-			System.err.println("Character Encoding Error");
+			addNewLine = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("There was an I/O Error while executing application");

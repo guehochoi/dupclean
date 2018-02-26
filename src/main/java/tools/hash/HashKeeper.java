@@ -53,13 +53,15 @@ public class HashKeeper {
 	}
 	
 	public static class HashKey {
-		private final byte[] hashInBytes;
-		public HashKey(byte[] hashInBytes) {
-			if (hashInBytes == null)
+		private final byte[] hashByteSHA1;
+		private final byte[] hashByteMD5;
+		public HashKey(byte[] hashByteSHA1, byte[] hashByteMD5) {
+			if (hashByteSHA1 == null || hashByteMD5 == null)
 	        {
 	            throw new NullPointerException();
 	        }
-			this.hashInBytes = hashInBytes;
+			this.hashByteSHA1 = hashByteSHA1;
+			this.hashByteMD5 = hashByteMD5;
 		}
 		@Override
 		public boolean equals(Object obj) {
@@ -67,15 +69,17 @@ public class HashKeeper {
 				return false;
 			}
 			HashKey hashKey = (HashKey) obj;
-			return Arrays.equals(this.hashInBytes, hashKey.hashInBytes);
+			return Arrays.equals(this.hashByteSHA1, hashKey.hashByteSHA1) && Arrays.equals(this.hashByteMD5, hashKey.hashByteMD5);
 		}
 		@Override
 		public int hashCode() {
-			return Arrays.hashCode(hashInBytes);
+			return Arrays.hashCode(hashByteSHA1) + Arrays.hashCode(hashByteMD5);
 		}
-		public byte[] getHashInBytes() {
-			return hashInBytes;
+		public byte[] getHashByteSHA1() {
+			return hashByteSHA1;
 		}
-		
+		public byte[] getHashByteMD5() {
+			return hashByteMD5;
+		}
 	}
 }
