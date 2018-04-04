@@ -41,7 +41,7 @@ public class HashKeeper {
 				System.out.println("hashing processed " + treeHash.getCount() + " files");
 			}
 			
-		}, 7*1000, 5*1000);
+		}, 10*1000, 10*1000);
 		try {
 			Files.walkFileTree(Paths.get(rootpath), treeHash);
 		} catch (IOException e) {

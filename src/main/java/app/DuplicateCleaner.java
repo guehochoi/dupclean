@@ -1,5 +1,6 @@
 package app;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -12,15 +13,18 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Formatter;
 import java.util.FormatterClosedException;
 import java.util.IllegalFormatException;
+import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
+import app.ui.MainFrame;
 import tools.hash.HashHelper;
 import tools.hash.HashKeeper;
 
@@ -31,16 +35,12 @@ import tools.hash.HashKeeper;
 public class DuplicateCleaner {
 	
 	private static Scanner scanner = new Scanner(System.in);
+	private static MainFrame mainframe = new MainFrame();
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		/*byte[] hash1 = HashHelper.getHashInBytes("src/main/resources/images/20160116_140836.jpg", "SHA-1");
-		byte[] hash2 = HashHelper.getHashInBytes("src/main/resources/images/duplicated140836.jpg", "SHA-1");
-
-		System.out.println("img1: " + HashHelper.hashByteToString(hash1));
-		System.out.println("img2: " + HashHelper.hashByteToString(hash2));*/
-		
+	
 		String input = promptInput();
 		Path path = Paths.get(input);
 		while (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
@@ -111,16 +111,91 @@ public class DuplicateCleaner {
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("There was an I/O Error while executing application");
-		} catch (FormatterClosedException | IllegalFormatException e) {
-			e.printStackTrace();
-			System.err.println("Error with formatter");
 		} catch (Exception e) {
 			System.err.println("Unexpected Error has occurred");
 		}
 		
-		System.out.println("Success");
+		System.out.println("Successfully finished hashing");
+		
+		try (BufferedReader reader = Files.newBufferedReader(output_filepath, charset)) {
+			String line;
+			while ( (line = reader.readLine()) != null) {
+				String[] dups = line.split("\\|"); 
+				if (dups.length < 2) {
+					continue;
+				}
+				displayDuplicates(dups);
+				int keepIndex = userChoiceInput();
+				if (keepIndex < 0) { // skip 
+					continue;
+				}
+				deleteDuplicates(dups, keepIndex);
+				
+			}
+				
+			reader.close();
+		
+		} catch (UnmappableCharacterException e) { 
+			e.printStackTrace();
+			addNewLine = true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("There was an I/O Error while executing application");
+		} catch (Exception e) {
+			System.err.println("Unexpected Error has occurred");
+		}
 	}
 	
+	private static void deleteDuplicates(String[] dups, int keepIndex) {
+		if (keepIndex < 0 || keepIndex > dups.length -1) {
+			System.out.println("ERROR: keepIndex: " + keepIndex + ", arrayLength: " + dups.length);
+			return;
+		}
+		int i = 0; 
+		while (i < dups.length) {
+			if (i == keepIndex) {
+				i++;
+				continue;
+			}
+			try {
+				Path p = Paths.get(dups[i]);
+				Path target = null;
+				if (!Files.isDirectory(p, LinkOption.NOFOLLOW_LINKS)) {
+					int j = 0;
+					while (Files.exists(target = Paths.get("D:\\\\Dump\\Archive\\" + p.getFileName() + j), LinkOption.NOFOLLOW_LINKS)) {
+						j++;
+					}
+				}
+				//Files.delete(p);
+				Files.move(p, target, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			i++;
+		}
+	}
+
+	private static int userChoiceInput() {
+		System.out.println("select one to keep: ");
+		int response = -1;
+		try {
+			response = Integer.parseInt(scanner.nextLine());
+		}catch (InputMismatchException | NumberFormatException e) {
+			e.printStackTrace();
+		}
+		
+		return response;
+	}
+
+	private static void displayDuplicates(String[] dups) {
+		for (int i = 0; i < dups.length; i++) {
+			System.out.println("[" + i + "]" + dups[i]);
+		}
+		mainframe.clearImagePanel();
+		mainframe.displayDuplicates(dups);
+	}
+
 	private static int count = 0;
 	private static int dirCount = 0;
 	private static long size = 0;
