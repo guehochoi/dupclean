@@ -189,11 +189,15 @@ public class DuplicateCleaner {
 	}
 
 	private static void displayDuplicates(String[] dups) {
+		boolean isImage = false;
 		for (int i = 0; i < dups.length; i++) {
 			System.out.println("[" + i + "]" + dups[i]);
+			isImage = dups[i].endsWith(".jpg") | dups[i].endsWith(".jpeg") | dups[i].endsWith(".png");
 		}
-		mainframe.clearImagePanel();
-		mainframe.displayDuplicates(dups);
+		if (isImage) {
+			mainframe.clearImagePanel();
+			mainframe.displayDuplicates(dups);
+		}
 	}
 
 	private static int count = 0;
